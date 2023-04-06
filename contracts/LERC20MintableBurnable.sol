@@ -57,4 +57,12 @@ contract LERC20MintableBurnable is Context, LERC20 {
         require(_msgSender() == admin, "LERC20: Must be admin");
         _mint(to, amount);
     }
+
+    /// @notice This function sets a new lossless controller
+    /// @dev Only can be called by the Recovery admin
+    /// @param _newLossless Address corresponding to the new Lossless Controller
+    function setLossless(address _newLossless) external onlyRecoveryAdmin {
+        require(_newLossless != address(0), "LERC20: Cannot set address(0)");
+        lossless = ILssController(_newLossless);
+    }
 }
