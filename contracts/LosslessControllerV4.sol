@@ -21,7 +21,12 @@ contract LosslessControllerV4 is ILssController, Context {
     mapping(address => bool) override public whitelist;
     mapping(address => bool) override public blacklist;
 
-    // --- MODIFIERS ---
+    constructor(address _admin, address _recoveryAdmin) {
+        admin = _admin;
+        recoveryAdmin = _recoveryAdmin;
+    }
+
+// --- MODIFIERS ---
 
     /// @notice Avoids execution from other than the Recovery Admin
     modifier onlyRecoveryAdmin() {
@@ -88,13 +93,15 @@ contract LosslessControllerV4 is ILssController, Context {
     function beforeTransfer(address _sender, address _recipient, uint256 _amount) override external {
         if (!whitelist[_sender]) {
             require(!blacklist[_recipient], "LSS: _recipient is blacklisted");
+        } else {
+            require(!blacklist[_sender], "LSS: _sender is blacklisted");
         }
     }
 
     /// @notice If address is protected, transfer validation rules have to be run inside the strategy.
     /// @dev isTransferAllowed reverts in case transfer can not be done by the defined rules.
     function beforeTransferFrom(address _msgSender, address _sender, address _recipient, uint256 _amount) override external {
-        if (!whitelist[_sender]) {
+        if (!whitelist[_msgSender] && !whitelist[_sender]) {
             require(!blacklist[_recipient], "LSS: _recipient is blacklisted");
         }
     }
