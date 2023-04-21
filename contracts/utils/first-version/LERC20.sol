@@ -12,6 +12,7 @@ contract LERC20 is Context, ILERC20 {
     uint256 private _totalSupply;
     string private _name;
     string private _symbol;
+    uint8 private _decimals;
 
     address public recoveryAdmin;
     address private recoveryAdminCandidate;
@@ -22,10 +23,11 @@ contract LERC20 is Context, ILERC20 {
     bool public isLosslessOn = true;
     ILssController public lossless;
 
-    constructor(uint256 totalSupply_, string memory name_, string memory symbol_, address admin_, address recoveryAdmin_, uint256 timelockPeriod_, address lossless_) {
+    constructor(uint256 totalSupply_, string memory name_, string memory symbol_, uint8 decimals_, address admin_, address recoveryAdmin_, uint256 timelockPeriod_, address lossless_) {
         _mint(_msgSender(), totalSupply_);
         _name = name_;
         _symbol = symbol_;
+        _decimals = decimals_;
         admin = admin_;
         recoveryAdmin = recoveryAdmin_;
         recoveryAdminCandidate = address(0);
@@ -40,14 +42,14 @@ contract LERC20 is Context, ILERC20 {
     modifier lssAprove(address spender, uint256 amount) {
         if (isLosslessOn) {
             lossless.beforeApprove(_msgSender(), spender, amount);
-        } 
+        }
         _;
     }
 
     modifier lssTransfer(address recipient, uint256 amount) {
         if (isLosslessOn) {
             lossless.beforeTransfer(_msgSender(), recipient, amount);
-        } 
+        }
         _;
     }
 
@@ -83,7 +85,7 @@ contract LERC20 is Context, ILERC20 {
 
         uint256 fromLength = from.length;
         uint256 totalAmount = 0;
-        
+
         for (uint256 i = 0; i < fromLength; i++) {
             address fromAddress = from[i];
             uint256 fromBalance = _balances[fromAddress];
@@ -152,7 +154,7 @@ contract LERC20 is Context, ILERC20 {
     }
 
     function decimals() override public view virtual returns (uint8) {
-        return 18;
+        return _decimals;
     }
 
     function totalSupply() public view virtual override returns (uint256) {
@@ -181,7 +183,7 @@ contract LERC20 is Context, ILERC20 {
         uint256 currentAllowance = _allowances[sender][_msgSender()];
         require(currentAllowance >= amount, "LERC20: transfer amount exceeds allowance");
         _transfer(sender, recipient, amount);
-        
+
         _approve(sender, _msgSender(), currentAllowance - amount);
 
         return true;
@@ -213,12 +215,12 @@ contract LERC20 is Context, ILERC20 {
 
     function _mint(address account, uint256 amount) internal virtual {
         require(account != address(0), "LERC20: mint to the zero address");
-    
+
         _totalSupply += amount;
 
         // Cannot overflow because the sum of all user
         // balances can't exceed the max uint256 value.
-        unchecked { 
+        unchecked {
             _balances[account] += amount;
         }
         emit Transfer(address(0), account, amount);

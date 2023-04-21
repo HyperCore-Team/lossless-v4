@@ -7,27 +7,29 @@ import "@openzeppelin/contracts/utils/Context.sol";
 contract LERC20MintableBurnable is Context, LERC20 {
 
     constructor(
-    uint256 totalSupply_, 
-    string memory name_, 
-    string memory symbol_, 
-    address admin_, 
-    address recoveryAdmin_, 
-    uint256 timelockPeriod_, 
+    uint256 totalSupply_,
+    string memory name_,
+    string memory symbol_,
+    uint8 decimals_,
+    address admin_,
+    address recoveryAdmin_,
+    uint256 timelockPeriod_,
     address lossless_
     ) LERC20(
-    totalSupply_, 
-    name_, 
-    symbol_, 
-    admin_, 
-    recoveryAdmin_, 
-    timelockPeriod_, 
+    totalSupply_,
+    name_,
+    symbol_,
+    decimals_,
+    admin_,
+    recoveryAdmin_,
+    timelockPeriod_,
     lossless_
     ) {}
 
     modifier lssBurn(address account, uint256 amount) {
         if (isLosslessOn) {
             lossless.beforeBurn(account, amount);
-        } 
+        }
         _;
     }
 
@@ -35,7 +37,7 @@ contract LERC20MintableBurnable is Context, LERC20 {
     modifier lssMint(address account, uint256 amount) {
         if (isLosslessOn) {
             lossless.beforeMint(account, amount);
-        } 
+        }
         _;
     }
 
